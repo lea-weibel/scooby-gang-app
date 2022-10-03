@@ -1,14 +1,39 @@
-import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet, FlatList } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Checkbox } from 'react-native-paper';
-import { useState } from "react";
-import CreateProjectScreen from "./CreateProject";
+import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import axios from 'axios';
+import ProjectCard from "../components/ProjectCard";
 
 export default function AllProjectsScreen() {
+    const [allProjects, setAllProjects] = useState([]);
     const [managedByMeFilter, setManagedByMeFilter] = useState(false);
     const [hideDoneFilter, setHideDoneFilter] = useState(false);
+    const [filteredProjects, setFilteredProjects] = useState(allProjects)
     const navigation = useNavigation();
+
+    useEffect(() => {
+        getAllProjects()
+        console.log('allprojects', allProjects);
+    }, [])
+
+    useEffect(() => {
+        if (managedByMeFilter && hideDoneFilter) setFilteredProjects(allProjects.filter((project) => project.owner === 'Velma Dinkley' && project.status === 'Done')); 
+        else if (managedByMeFilter) setFilteredProjects(allProjects.filter((project) => project.owner === 'Velma Dinkley'));
+        else if (hideDoneFilter) setFilteredProjects(allProjects.filter((project) => project.status === 'Done'));
+        else setFilteredProjects(allProjects);
+    }, [managedByMeFilter, hideDoneFilter])
+
+    const getAllProjects = async () => {
+        try {
+            await axios
+                .get('http://192.168.0.26:80/projects')
+                .then((result) => setAllProjects(result.data.data))
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     return (
         <View>
@@ -41,6 +66,17 @@ export default function AllProjectsScreen() {
                     <Ionicons name="add-circle" size={28} color="black" />
                 </View>
             </TouchableOpacity>
+            {filteredProjects.length >= 1 ?
+                <FlatList
+                    data={filteredProjects}
+                    keyExtractor={project => project._id}
+                    renderItem={({ item }) => {
+                        return (
+                            <ProjectCard name={item.name} owner={item.owner} dueDate={item.dueDate} status={item.status} />
+                        );
+                    }}
+                /> : <Text>No projects yet...</Text>
+            }
         </View>
     )
 }

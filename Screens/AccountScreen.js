@@ -1,7 +1,12 @@
-import {Text} from "react-native";
+import { View, Text } from "react-native";
 
 export default function AccountScreen() {
     return (
-        <Text>Account</Text>
+        <View>
+            <Text>AVATAR HERE</Text>
+            <Text>Firstame Lastname</Text>
+            <Text>email@email.com</Text>
+            <Text>change password</Text>
+        </View>
     )
 }
