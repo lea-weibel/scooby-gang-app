@@ -1,6 +1,3 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-// import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ProjectsScreen from './ProjectsScreen';
 import AllTasksScreen from './AllTasksScreen';
@@ -26,19 +23,10 @@ export default function App() {
           tabBarInactiveTintColor: 'gray'
         })}>
         <Tab.Screen name='Dashboard' component={CurrentProjectsScreen} />
-        <Tab.Screen name='Projects' options={{ headerTitle: 'All My Projects' }} component={ProjectsScreen} />
+        <Tab.Screen name='Projects' options={{ headerShown: false }} component={ProjectsScreen} />
         <Tab.Screen name='Tasks' options={{ headerTitle: 'All My Tasks' }} component={AllTasksScreen} />
         <Tab.Screen name='Account' options={{ headerTitle: 'My Account' }} component={AccountScreen} />
         {/* <StatusBar style="auto" /> */}
       </Tab.Navigator>
   );
 }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-// });

@@ -1,11 +1,34 @@
-import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet, FlatList } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
 import ProjectCard from "../components/ProjectCard";
+import axios from 'axios';
+import { useEffect, useState } from "react";
+
 
 export default function CurrentProjectsScreen() {
+    const [currentProjects, setCurrentProjects] = useState([]);
 
     const navigation = useNavigation();
+
+    useEffect(() => {
+        getCurrentProjects()
+    }, [])
+
+    const getCurrentProjects = async () => {
+        try {
+            await axios
+                .get('http://192.168.0.26:80/projects')
+                .then((result) => {
+                    const projects = result.data.data;
+                    const getLastUpdate = projects.map((project) => project.lastUpdate).sort((a, b) => b - a);
+                    const sortedProjects = getLastUpdate.map((date) => projects.find((project) => project.lastUpdate === date));
+                    (sortedProjects.length > 3) ? setCurrentProjects(sortedProjects.slice(0, 3)) : setCurrentProjects(sortedProjects);
+                })
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     return (
         <View>
@@ -24,11 +47,19 @@ export default function CurrentProjectsScreen() {
                     </TouchableOpacity>
                 </View>
             </View>
-            <View style={styles.projectCardsContainer}>
-                <ProjectCard />
-                <ProjectCard />
-                <ProjectCard />
-            </View>
+            {currentProjects.length >= 1 ?
+                <FlatList
+                    data={currentProjects}
+                    keyExtractor={project => project._id}
+                    renderItem={({ item }) => {
+                        return (
+                            <View style={styles.centering}>
+                                <ProjectCard {...item} />
+                            </View>
+                        );
+                    }}
+                /> : <Text>No projects yet...</Text>
+            }
         </View>
     )
 }
@@ -50,9 +81,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between'
     },
-    projectCardsContainer: {
+    centering: {
+        flex: 1,
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     }
 })
