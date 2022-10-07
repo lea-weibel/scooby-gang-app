@@ -6,7 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 
 export default function CreateProjectScreen() {
 
-    const [newProject, setNewProject] = useState({ name: '', owner: 'Velma Dinkley', members: [], creationDate: new Date().toLocaleDateString(), dueDate: '', lastUpdate: Date.now(), status: 'Not started', description: ''})
+    const [newProject, setNewProject] = useState({ name: '', owner: 'Velma Dinkley', members: [], creationDate: new Date().toLocaleDateString(), dueDate: '', lastUpdate: Date.now(), status: 'todo', description: ''})
     const [newMember, setNewMember] = useState('')
     const navigation = useNavigation();
 
@@ -83,7 +83,7 @@ export default function CreateProjectScreen() {
                     </View>
                 }
                 <TouchableOpacity style={styles.button} onPress={() => createProject()}>
-                    <Text style={{ color: '#D6E04C' }}>
+                    <Text>
                         Create project
                     </Text>
                 </TouchableOpacity>

@@ -3,21 +3,21 @@ import { Octicons } from "@expo/vector-icons";
 
 export const statusChecker = (status) => {
   switch (status) {
-    case "Done":
+    case "done":
       return (
         <View style={statusCheckerStyles.done}>
           <Octicons name="dot-fill" size={12} color="green" />
           <Text style={statusCheckerStyles.doneText}>Done</Text>
         </View>
       );
-    case "In progress":
+    case "inProgress":
       return (
         <View style={statusCheckerStyles.inProgress}>
           <Octicons name="dot-fill" size={12} color="yellow" />
           <Text>In Progress</Text>
         </View>
       );
-    case "Not started":
+    case "todo":
       return (
         <View style={statusCheckerStyles.notStarted}>
           <Octicons name="dot-fill" size={12} color="red" />

@@ -1,30 +1,22 @@
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View, StyleSheet, Dimensions, TouchableOpacity, Modal, FlatList } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
+import { Text, View, StyleSheet, Dimensions, TouchableOpacity, Modal, FlatList } from "react-native";
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { TextInput } from "react-native-paper";
-import { statusChecker } from "../components/StatusChecker";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
-
+import TasksSlider from "../components/TasksSlider";
+import { statusChecker } from "../components/StatusChecker";
 
 export default function ProjectDetailsScreen({ route }) {
     const project = route.params;
     const [modalVisible, setModalVisible] = useState(false);
     const [displayMembers, setDisplayMembers] = useState(false);
     const [displayMembersInfo, setDisplayMembersInfo] = useState(false);
-    const [displayDescription, setDisplayDescription] = useState(false);
     const [newTask, setNewTask] = useState({ title: '', description: '', projectId: project._id, status: 'todo', creationDate: new Date().toLocaleDateString(), assignedTo: [] })
     const [assignedMembers, setAssignedMembers] = useState([]);
     const navigation = useNavigation();
-    const [allTasks, setAllTasks] = useState([])
+    const [displayDescription, setDisplayDescription] = useState(false);
 
-    useEffect(() => {
-        getAllTasks();
-    }, [])
-
-    useEffect(() => {
-        console.log('all tasks', allTasks);
-    }, [allTasks])
 
     const assignMembers = (member) => {
         if (assignedMembers.includes(member)) setAssignedMembers(assignedMembers.filter((item) => item !== member))
@@ -38,19 +30,10 @@ export default function ProjectDetailsScreen({ route }) {
             await axios
                 .post('http://192.168.0.26:80/tasks', { ...task })
                 .then((result) => {
-                    (result.status === 201) && navigation.goBack();
-                    setDisplayMembers(false)
+                    (result.status === 201);
+                    setDisplayMembers(false);
+                    setModalVisible(false);
                 })
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    const getAllTasks = async () => {
-        try {
-            await axios
-                .get('http://192.168.0.26:80/tasks')
-                .then((result) => setAllTasks(result.data.data))
         } catch (error) {
             console.error(error);
         }
@@ -59,9 +42,9 @@ export default function ProjectDetailsScreen({ route }) {
     return (
         <View style={styles.projectDetails}>
 
+            {/***  PROJECT INFOS  ***/}
             <View style={styles.infos}>
-
-                <View style={[styles.infoPair, {marginBottom: 14}]}>
+                <View style={[styles.infoPair, { marginBottom: 14 }]}>
                     <Text style={styles.projectName}>{project.name}</Text>
                     <TouchableOpacity><Ionicons name="create-outline" size={24} color="black" /></TouchableOpacity>
                 </View>
@@ -73,9 +56,9 @@ export default function ProjectDetailsScreen({ route }) {
 
                 <View style={styles.infoPair}>
                     <TouchableOpacity style={styles.dropdown} onPress={() => setDisplayMembersInfo(!displayMembersInfo)}>
-                        <Text style={{ marginRight: 8 }}>Members:</Text>
-                        {displayMembersInfo ? <Ionicons name="chevron-up-circle-outline" size={24} color="black" /> :
-                            <Ionicons name="chevron-down-circle-outline" size={24} color="black" />}
+                        <Text style={{ marginRight: 8 }}>Members</Text>
+                        {displayMembersInfo ? <MaterialCommunityIcons name="chevron-up" size={24} color="black" /> :
+                            <MaterialCommunityIcons name="chevron-down" size={24} color="black" />}
                     </TouchableOpacity>
                     <Text style={styles.data2}>Created: {project.creationDate}</Text>
                 </View>
@@ -92,23 +75,19 @@ export default function ProjectDetailsScreen({ route }) {
 
                 <View style={styles.infoPair}>
                     <TouchableOpacity style={styles.dropdown} onPress={() => setDisplayDescription(!displayDescription)}>
-                        <Text style={{ marginRight: 8 }}>Description:</Text>
-                        {displayDescription ? <Ionicons name="chevron-up-circle-outline" size={24} color="black" /> :
-                            <Ionicons name="chevron-down-circle-outline" size={24} color="black" />}
+                        <Text style={{ marginRight: 8 }}>Description</Text>
+                        {displayDescription ? <MaterialCommunityIcons name="chevron-up" size={24} color="black" /> :
+                            <MaterialCommunityIcons name="chevron-down" size={24} color="black" />}
                     </TouchableOpacity>
                     <Text style={styles.data2}>{statusChecker(project.status)}</Text>
                 </View>
 
                 {displayDescription && <Text>{project.description}</Text>}
+
             </View>
 
-
-
-
-
+            {/***  MODAL FOR TASK CREATION  ***/}
             <View style={styles.infoPair}>
-                <Text>Project's tasks</Text>
-                <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}><Ionicons name="add-circle-outline" size={24} color="black" /></TouchableOpacity>
                 <Modal
                     animationType="slide"
                     transparent={true}
@@ -154,34 +133,15 @@ export default function ProjectDetailsScreen({ route }) {
                 </Modal>
             </View>
 
-            <ScrollView horizontal pagingEnabled centerContent contentContainerStyle={styles.taskContainer}>
-                <View style={styles.taskSection}>
-                    <View style={styles.taskColumn}>
-                        <Text>TO DO</Text>
-                        <FlatList
-                            data={allTasks}
-                            keyExtractor={task => task._id}
-                            renderItem={({ item }) => {
-                                return (
-                                    <View style={styles.singleTask}>
-                                        <Text style={{ fontWeight: '700' }}>{item.title}</Text>
-                                        <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                            <Text style={{ marginRight: 8 }}>Description</Text>
-                                            {displayDescription ? <Ionicons name="chevron-up-circle-outline" size={24} color="black" /> : <Ionicons name="chevron-down-circle-outline" size={24} color="black" />}
-                                        </View>
-                                    </View>
-                                );
-                            }}
-                        />
-                    </View>
-                </View>
-                <View style={styles.taskSection}>
-                    <Text style={styles.taskColumn}>IN PROGRESS</Text>
-                </View>
-                <View style={styles.taskSection}>
-                    <Text style={styles.taskColumn}>DONE</Text>
-                </View>
-            </ScrollView>
+            {/***  TASKS SLIDER  ***/}
+            <TasksSlider projectId={project._id} />
+
+            {/***  ADD NEW TASK BUTTON  ***/}
+            <TouchableOpacity style={styles.button} onPress={() => setModalVisible(!modalVisible)}>
+                <Text style={{ color: '#000' }}>
+                    Create new task
+                </Text>
+            </TouchableOpacity>
         </View>
     )
 }
@@ -191,9 +151,6 @@ const styles = StyleSheet.create({
         display: 'flex',
         alignItems: 'center'
     },
-    taskContainer: {
-        height: Dimensions.get('window').height - 300,
-    },
     infos: {
         width: '90%',
         backgroundColor: 'white',
@@ -201,24 +158,6 @@ const styles = StyleSheet.create({
         marginVertical: 16,
         padding: 12,
         lineHeight: 2
-    },
-    singleTask: {
-        backgroundColor: 'white',
-        width: '90%',
-        marginBottom: 8
-    },
-    taskSection: {
-        height: 60,
-        width: Dimensions.get('window').width,
-        display: 'flex',
-        alignItems: 'center'
-    },
-    taskColumn: {
-        width: '90%',
-        borderColor: 'black',
-        borderWidth: 2,
-        borderRadius: 4,
-        height: Dimensions.get('window').height / 2,
     },
     infoPair: {
         display: 'flex',
@@ -255,9 +194,14 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2
+        backgroundColor: '#7F81BE',
+        width: '90%',
+        padding: 12,
+        borderWidth: 2,
+        borderColor: '#000',
+        borderRadius: 2,
+        display: 'flex',
+        alignItems: 'center',
     },
     modalText: {
         marginBottom: 15,
